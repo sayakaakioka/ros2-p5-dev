@@ -1,0 +1,19 @@
+services:
+  ros2-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PROCESSING_URL: ${PROCESSING_URL}
+    image: ros2-p5-dev:kilted-local
+    container_name: ros2-dev
+    init: true
+    restart: unless-stopped
+    environment:
+      - LIBGL_ALWAYS_SOFTWARE=1
+    volumes:
+      - ./sketches:/ws/sketches
+      - ./workspace:/ws
+    ports:
+      - "6080:6080" # For noVNC
+      - "5900:5900" # For VNC
