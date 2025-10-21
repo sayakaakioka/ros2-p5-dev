@@ -28,7 +28,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     xvfb x11vnc fluxbox websockify novnc supervisor \
     mesa-utils libgl1 libglu1-mesa libxi6 libxrender1 libxtst6 \
     libxrandr2 libxinerama1 libxxf86vm1 libgtk-3-0 \
-    xauth x11-apps xterm fluxbox sudo x11-xserver-utils \
+    xauth x11-apps xterm sudo x11-xserver-utils \
     dbus-x11 libgl1-mesa-dri
 
 RUN set -eux; \
@@ -39,8 +39,9 @@ RUN set -eux; \
         *) echo "unsupported TARGETARCH=${TARGETARCH}"; exit 1 ;; \
       esac; \
     fi; \
-    test -n "${PROCESSING_URL:?PROCESSING_URL must be a .zip}"; \
-    curl -fsSL "$PROCESSING_URL" -o /tmp/processing.zip; \
+    echo "Fetching Processing from: ${PROCESSING_URL}"; \
+    curl -fL --retry 5 --retry-delay 3 --retry-connrefused \
+      -o /tmp/processing.zip "${PROCESSING_URL}"; \
     rm -rf /tmp/p5; mkdir -p /tmp/p5; \
     unzip -q /tmp/processing.zip -d /tmp/p5; \
     dir="$(find /tmp/p5 -maxdepth 1 -type d \( -iname "processing*" -o -iname "Processing*" \) | head -n1)"; \
