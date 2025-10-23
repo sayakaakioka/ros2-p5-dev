@@ -1,6 +1,7 @@
 FROM ubuntu:24.04
 ARG TARGETARCH
-ARG PROCESSING_URL
+ARG PROCESSING_VERSION=4.4.10
+ARG PROCESSING_BUILD=1310
 
 SHELL ["/bin/bash", "-c"]
 
@@ -32,32 +33,32 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     dbus-x11 libgl1-mesa-dri
 
 RUN set -eux; \
-    if [ -z "${PROCESSING_URL:-}" ]; then \
-      case "${TARGETARCH:-amd64}" in \
-        amd64) PROCESSING_URL="https://download.processing.org/processing-4.4-linux-x64.zip" ;; \
-        arm64) PROCESSING_URL="https://download.processing.org/processing-4.4-linux-arm64.zip" ;; \
-        *) echo "unsupported TARGETARCH=${TARGETARCH}"; exit 1 ;; \
-      esac; \
-    fi; \
-    echo "Fetching Processing from: ${PROCESSING_URL}"; \
-    curl -fL --retry 5 --retry-delay 3 --retry-connrefused \
-      -o /tmp/processing.zip "${PROCESSING_URL}"; \
-    rm -rf /tmp/p5; mkdir -p /tmp/p5; \
-    unzip -q /tmp/processing.zip -d /tmp/p5; \
-    dir="$(find /tmp/p5 -maxdepth 1 -type d \( -iname 'processing*' -o -iname 'Processing*' \) | head -n1)"; \
-    test -n "$dir"; \
-    rm -rf /opt/processing; mv "$dir" /opt/processing; \
-    exe="$(find /opt/processing -maxdepth 3 -type f \( -iname processing -o -iname Processing \) | head -n1)"; \
-    test -x "$exe"; \
-    printf '%s\n' '#!/usr/bin/env bash' \
-      'export LIBGL_ALWAYS_SOFTWARE=${LIBGL_ALWAYS_SOFTWARE:-1}' \
-      'export SKIKO_RENDER_API=${SKIKO_RENDER_API:-SOFTWARE}' \
-      'export XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}' \
-      'export _JAVA_OPTIONS="${_JAVA_OPTIONS:-} --add-opens=java.desktop/sun.awt.X11=ALL-UNNAMED --add-opens=java.desktop/sun.awt=ALL-UNNAMED"' \
-      'export NO_AT_BRIDGE=${NO_AT_BRIDGE:-1}' \
-      'command -v dbus-launch >/dev/null 2>&1 && [ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ] && eval $(dbus-launch --sh-syntax) || true' \
-      "exec \"$exe\" \"\$@\"" > /usr/local/bin/processing && chmod +x /usr/local/bin/processing; \
-    rm -rf /tmp/processing.zip /tmp/p5
+  : "${TARGETARCH:=amd64}"; \
+  case "${TARGETARCH}" in \
+    amd64)   PFILE="processing-${PROCESSING_VERSION}-linux-x64-portable.zip" ;; \
+    arm64)   PFILE="processing-${PROCESSING_VERSION}-linux-aarch64-portable.zip" ;; \
+    *) echo "unsupported TARGETARCH=${TARGETARCH}"; exit 1 ;; \
+  esac; \
+  TAG="processing-${PROCESSING_BUILD}-${PROCESSING_VERSION}"; \
+  URL="https://github.com/processing/processing4/releases/download/${TAG}/${PFILE}"; \
+  echo "Fetching Processing from: ${URL}"; \
+  curl -fL --retry 5 --retry-delay 3 --retry-connrefused -o /tmp/processing.zip "${URL}"; \
+  rm -rf /tmp/p5; mkdir -p /tmp/p5; \
+  unzip -q /tmp/processing.zip -d /tmp/p5; \
+  dir="$(find /tmp/p5 -maxdepth 1 -type d \( -iname 'processing*' -o -iname 'Processing*' \) | head -n1)"; \
+  test -n "$dir"; \
+  rm -rf /opt/processing; mv "$dir" /opt/processing; \
+  exe="$(find /opt/processing -maxdepth 3 -type f \( -iname processing -o -iname Processing \) | head -n1)"; \
+  test -x "$exe"; \
+  printf '%s\n' '#!/usr/bin/env bash' \
+    'export LIBGL_ALWAYS_SOFTWARE=${LIBGL_ALWAYS_SOFTWARE:-1}' \
+    'export SKIKO_RENDER_API=${SKIKO_RENDER_API:-SOFTWARE}' \
+    'export XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}' \
+    'export _JAVA_OPTIONS="${_JAVA_OPTIONS:-} --add-opens=java.desktop/sun.awt.X11=ALL-UNNAMED --add-opens=java.desktop/sun.awt=ALL-UNNAMED"' \
+    'export NO_AT_BRIDGE=${NO_AT_BRIDGE:-1}' \
+    'command -v dbus-launch >/dev/null 2>&1 && [ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ] && eval $(dbus-launch --sh-syntax) || true' \
+    "exec \"$exe\" \"\$@\"" > /usr/local/bin/processing && chmod +x /usr/local/bin/processing; \
+  rm -rf /tmp/processing.zip /tmp/p5
 
 # user ubuntu
 RUN echo "ubuntu ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
