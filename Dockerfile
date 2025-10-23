@@ -4,10 +4,16 @@ FROM ubuntu:${UBUNTU_TAG}
 ARG TARGETARCH
 ARG PROCESSING_VERSION
 ARG PROCESSING_BUILD
+ARG ROS_DISTRO
 SHELL ["/bin/bash", "-c"]
 
 # Preparation
-ENV TZ=Asia/Tokyo ROS_DISTRO=kilted
+ENV TZ=Asia/Tokyo ROS_DISTRO=${ROS_DISTRO}
+  RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
+ && echo $TZ > /etc/timezone \
+ && apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tzdata
+
 RUN apt-get update && apt-get install --no-install-recommends -y locales
 RUN locale-gen en_US en_US.UTF-8
 RUN update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8

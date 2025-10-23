@@ -13,7 +13,7 @@ All images in this repository are distributed under the [Apache License 2.0](./L
 ## Available Images
 Image Name         | Description
 -------------------|-------------
-ros2-p5-dev:latest | Base image with ROS2 and Processing IDE
+ros2-p5-dev:latest | Latest ROS2 envrironment, based on Kilted
 ros2-p5-dev:hunmble| ROS2 Humble-based environment
 ros2-p5-dev:jazzy  | ROS2 Jazzy-based environment
 ros2-p5-dev:kilted | ROS2 Kilted-based environment
