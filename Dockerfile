@@ -34,8 +34,8 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 RUN set -eux; \
     if [ -z "${PROCESSING_URL:-}" ]; then \
       case "${TARGETARCH:-amd64}" in \
-        amd64) PROCESSING_URL="https://download.processing.org/processing-4.3-linux-x64.zip" ;; \
-        arm64) PROCESSING_URL="https://download.processing.org/processing-4.3-linux-aarch64.zip" ;; \
+        amd64) PROCESSING_URL="https://download.processing.org/processing-4.4-linux-x64.zip" ;; \
+        arm64) PROCESSING_URL="https://download.processing.org/processing-4.4-linux-arm64.zip" ;; \
         *) echo "unsupported TARGETARCH=${TARGETARCH}"; exit 1 ;; \
       esac; \
     fi; \
@@ -44,11 +44,11 @@ RUN set -eux; \
       -o /tmp/processing.zip "${PROCESSING_URL}"; \
     rm -rf /tmp/p5; mkdir -p /tmp/p5; \
     unzip -q /tmp/processing.zip -d /tmp/p5; \
-    dir="$(find /tmp/p5 -maxdepth 1 -type d \( -iname "processing*" -o -iname "Processing*" \) | head -n1)"; \
+    dir="$(find /tmp/p5 -maxdepth 1 -type d \( -iname 'processing*' -o -iname 'Processing*' \) | head -n1)"; \
     test -n "$dir"; \
     rm -rf /opt/processing; mv "$dir" /opt/processing; \
     exe="$(find /opt/processing -maxdepth 3 -type f \( -iname processing -o -iname Processing \) | head -n1)"; \
-    test -n "$exe" && test -x "$exe"; \
+    test -x "$exe"; \
     printf '%s\n' '#!/usr/bin/env bash' \
       'export LIBGL_ALWAYS_SOFTWARE=${LIBGL_ALWAYS_SOFTWARE:-1}' \
       'export SKIKO_RENDER_API=${SKIKO_RENDER_API:-SOFTWARE}' \
