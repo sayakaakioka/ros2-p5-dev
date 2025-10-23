@@ -62,9 +62,9 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
       
-        - name: Tag :latest -> kilted
-          if: matrix.latest == true
-          run: |
-            DIGEST=$(docker buildx imagetools inspect ${{ env.IMAGE_NAME }}:${{ matrix.ros }} --format '{{json .Manifest.Digest}}' | tr -d '"')
-            docker buildx imagetools create --tag ${{ env.IMAGE_NAME }}:latest $DIGEST
+      - name: Tag :latest -> kilted
+        if: matrix.latest == true
+        run: |
+          DIGEST=$(docker buildx imagetools inspect ${{ env.IMAGE_NAME }}:${{ matrix.ros }} --format '{{json .Manifest.Digest}}' | tr -d '"')
+          docker buildx imagetools create --tag ${{ env.IMAGE_NAME }}:latest $DIGEST
 
