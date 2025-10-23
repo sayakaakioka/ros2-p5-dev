@@ -68,6 +68,9 @@ RUN set -eux; \
   rm -rf /tmp/processing.zip /tmp/p5
 
 # user ubuntu
+RUN set -eux; \
+  id -u ubuntu >/dev/null 2>&1 || useradd -m -s /bin/bash ubuntu; \
+  install -o ubuntu -g ubuntu -d /home/ubuntu/.config /home/ubuntu/.cache /home/ubuntu/.local/share
 RUN echo "ubuntu ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
   && mkdir -p /home/ubuntu/.config /home/ubuntu/.cache /home/ubuntu/.local/share \
   && chown -R ubuntu:ubuntu /home/ubuntu/.config /home/ubuntu/.cache /home/ubuntu/.local
