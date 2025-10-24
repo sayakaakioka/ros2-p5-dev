@@ -37,7 +37,8 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     mesa-utils libgl1 libglu1-mesa libxi6 libxrender1 libxtst6 \
     libxrandr2 libxinerama1 libxxf86vm1 libgtk-3-0 \
     xauth x11-apps xterm sudo x11-xserver-utils \
-    dbus-x11 libgl1-mesa-dri
+    dbus-x11 libgl1-mesa-dri \
+    less lynx
 
 RUN set -eux; \
   : "${TARGETARCH:=amd64}"; \
