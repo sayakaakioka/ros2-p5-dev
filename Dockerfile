@@ -9,25 +9,27 @@ SHELL ["/bin/bash", "-c"]
 
 # Preparation
 ENV TZ=Asia/Tokyo ROS_DISTRO=${ROS_DISTRO}
-  RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
  && echo $TZ > /etc/timezone \
  && apt-get update \
- && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tzdata
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tzdata \
+ && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update && apt-get install --no-install-recommends -y locales
+RUN apt-get update && apt-get install --no-install-recommends -y locales \
+  && rm -rf /var/lib/apt/lists/*
 RUN locale-gen en_US en_US.UTF-8
 RUN update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
 ENV LANG=en_US.UTF-8
 
-RUN apt-get update && apt-get install --no-install-recommends -y curl ca-certificates gnupg
+RUN apt-get update && apt-get install --no-install-recommends -y curl ca-certificates gnupg \
+ && rm -rf /var/lib/apt/lists/*
 RUN curl -fsSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key \
-      | gpg --dearmor -o /usr/share/keyrings/ros-archive-keyring.gpg; \
+    | gpg --dearmor -o /usr/share/keyrings/ros-archive-keyring.gpg; \
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] \
       http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" \
       > /etc/apt/sources.list.d/ros2.list; \
     apt-get update; \
-    apt-get install -y --no-install-recommends \
-      ros-${ROS_DISTRO}-desktop ros-dev-tools; \
+    apt-get install -y --no-install-recommends ros-${ROS_DISTRO}-desktop ros-dev-tools; \
     rm -rf /var/lib/apt/lists/*
 
 # Processing + GUI tools installation
@@ -38,7 +40,8 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     libxrandr2 libxinerama1 libxxf86vm1 libgtk-3-0 \
     xauth x11-apps xterm sudo x11-xserver-utils \
     dbus-x11 libgl1-mesa-dri \
-    less lynx
+    less lynx \
+  && rm -rf /var/lib/apt/lists/*
 
 RUN set -eux; \
   : "${TARGETARCH:=amd64}"; \

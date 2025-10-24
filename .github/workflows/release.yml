@@ -1,0 +1,82 @@
+name: Release (tag push)
+
+on:
+    push:
+        tags:
+        - "v*"
+
+permissions:
+    contents: write
+    packages: write
+    id-token: write
+
+env:
+    IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/ros2-p5-dev
+    PROCESSING_VERSION: "4.4.10"
+    PROCESSING_BUILD: "1310"
+
+jobs:
+    publish:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                include:
+                - ros: kilted
+                  ubuntu: "24.04"
+                  latest: true
+                - ros: jazzy
+                  ubuntu: "24.04"
+                  latest: false
+                - ros: humble
+                  ubuntu: "22.04"
+                  latest: false
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Extract version from tag
+              id: meta
+              run: |
+                V="${GITHUB_REF##*/}"
+                echo "version=${V#v}" >> "$GITHUB_OUTPUT"
+
+            - uses: docker/setup-qemu-action@v3
+            - uses: docker/setup-buildx-action@v3
+
+            - uses: docker/login-action@v3
+              with:
+                registry: ghcr.io
+                username: ${{ github.actor }}
+                password: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Build & push (multi-arch)
+              uses: docker/build-push-action@v6
+              with:
+                context: .
+                push: true
+                platforms: linux/amd64,linux/arm64
+                build-args: |
+                    UBUNTU_TAG=${{ matrix.ubuntu }}
+                    ROS_DISTRO=${{ matrix.ros }}
+                    PROCESSING_VERSION=${{ env.PROCESSING_VERSION }}
+                    PROCESSING_BUILD=${{ env.PROCESSING_BUILD }}
+                tags: |
+                    ${{ env.IMAGE_NAME }}:v${{ steps.meta.outputs.version }}-ros2-${{ matrix.ros }}
+                    ${{ env.IMAGE_NAME }}:ros2-${{ matrix.ros }}
+                labels: |
+                    org.opencontainers.image.title=ros2-p5-dev
+                    org.opencontainers.image.description=ROS2 ${{ matrix.ros }} + Processing ${{ env.PROCESSING_VERSION }} (linux/amd64, linux/arm64)
+                cache-from: type=gha
+                cache-to: type=gha,mode=max
+                provenance: true
+                sbom: true
+            
+            - name: Point :latest to the chosen distro
+              if: matrix.latest == true
+              run: |
+                docker buildx imagetools create --tag ${{ env.IMAGE_NAME }}:latest ${{ env.IMAGE_NAME }}:ros2-${{ matrix.ros }}
+
+            - name: Create GitHub Release
+              uses: softprops/action-gh-release@v2
+              with:
+                tag_name: v${{ steps.meta.outputs.version }}
+                generate_release_notes: true

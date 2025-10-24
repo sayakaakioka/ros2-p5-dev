@@ -4,7 +4,10 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        PROCESSING_URL: ${PROCESSING_URL}
+        UBUNTU_TAG: "24.04"
+        ROS_DISTRO: "kilted"
+        PROCESSING_VERSION: "4.4.10"
+        PROCESSING_BUILD: "1310"
     image: ros2-p5-dev:kilted-local
     container_name: ros2-dev
     init: true
