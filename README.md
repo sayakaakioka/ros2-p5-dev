@@ -59,7 +59,6 @@ $ docker rm ros2-p5-dev
 $ docker ps
 ```
 
-
 ## License
 This repository is licensed under the [Apache License 2.0](./LICENSE).
 
