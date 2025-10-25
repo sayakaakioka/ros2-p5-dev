@@ -6,40 +6,46 @@ All images in this repository are distributed under the [Apache License 2.0](./L
 
 ## Features
 - Preconfigured environments with ROS2 and Processing
-- Accessible through a browser-based VNC interface
-- Multiple image variants for different development needs
-- Quick and portable -- no local installation required
+- Accessible through a browser-based VNC (`noVNC` at port 6080)
+- Multiple image variants corresponding to different ROS2 distros
+- Multi-architecture support (amd64/arm64)
+- Quick, portable, and requires no local installation
 
-## Available Images
-Image Name         | Description
+## Available Image Tags
+Image Tag         | Description
 -------------------|-------------
-ros2-p5-dev:latest | Latest ROS2 envrironment, based on Kilted
-ros2-p5-dev:hunmble| ROS2 Humble-based environment
-ros2-p5-dev:jazzy  | ROS2 Jazzy-based environment
-ros2-p5-dev:kilted | ROS2 Kilted-based environment
+ghcr.io/sayakaakioka/ros2-p5-dev:latest` | Latest stable build (points to the newest ROS2 distro, currently **Kilted**)
+ghcr.io/sayakaakioka/ros2-p5-dev:ros2-kilted | ROS2 Kilted-based environment
+ghcr.io/sayakaakioka/ros2-p5-dev:ros2-jazzy | ROS2 Jazzy-based environment
+ghcr.io/sayakaakioka/ros2-p5-dev:ros2-humble | ROS2 Humble-based environment
+ghcr.io/sayakaakioka/ros2-p5-dev:vX.Y-ros2-`<distro>` | Version-locked tag (e.g. `v2.7-ros2-humble`)
+
+The `latest` tag is updated automatically on each GitHub Release.
+
+## Releases
+See all published versions and changelogs at [GitHub Releases](https://github.com/sayakaakioka/ros2-p5-dev/releases)
+
+The release notes are automatically generated when new tags (e.g., `v2.7`) are pushed.
+Each release provides prebuilt multi-arch images for all supported ROS2 distros.
 
 ## Quick Start
-1. Run the container. Replace `<tag>` with your desired image tag (e.g. `latest`).
+1. Run the container. Replace `<tag>` with your desired image tag (e.g. `ros2-kilted` or `latest`):
 ```
 $ docker run -d -p 6080:6080 --name ros2-p5-dev ghcr.io/sayakaakioka/ros2-p5-dev:<tag>
 ```
 
-2. Open your browser and navigate to: http://localhost:6080/vnc.html?autoconnect=1
-3. You will be automatically logged in as user `ubuntu`,
-and an xterm window will open on startup.
+2. Open your browser at http://localhost:6080/vnc.html?autoconnect=1
+3. You will be logged in as user `ubuntu`,
+and an xterm window will start automatically.
 
 ## Launch Processing
-The Processing IDE can be launched with
+Inside the container:
 ```
 $ processing
 ```
-The Processing IDE command at:
-```
-/usr/local/bin/processing
-```
-is a wrapper script that calls the actual Processing binary installed in the container.
+The command `/usr/local/bin/processing` is a wrapper that configures environment variables and launches the actual Processing binary installed in `/opt/processing`.
 
-## Tips
+## Common Commands
 - Stop the container:
 ```
 $ docker stop ros2-p5-dev
@@ -48,7 +54,7 @@ $ docker stop ros2-p5-dev
 ```
 $ docker rm ros2-p5-dev
 ```
-- List all running containers:
+- List running containers:
 ```
 $ docker ps
 ```
