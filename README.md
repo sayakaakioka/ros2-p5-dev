@@ -14,7 +14,7 @@ All images in this repository are distributed under the [Apache License 2.0](./L
 ## Available Image Tags
 Image Tag         | Description
 -------------------|-------------
-ghcr.io/sayakaakioka/ros2-p5-dev:latest` | Latest stable build (points to the newest ROS2 distro, currently **Kilted**)
+ghcr.io/sayakaakioka/ros2-p5-dev:latest | Latest stable build (points to the newest ROS2 distro, currently **Kilted**)
 ghcr.io/sayakaakioka/ros2-p5-dev:ros2-kilted | ROS2 Kilted-based environment
 ghcr.io/sayakaakioka/ros2-p5-dev:ros2-jazzy | ROS2 Jazzy-based environment
 ghcr.io/sayakaakioka/ros2-p5-dev:ros2-humble | ROS2 Humble-based environment
