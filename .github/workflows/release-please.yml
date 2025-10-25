@@ -12,18 +12,8 @@ jobs:
     release-please:
         runs-on: ubuntu-latest
         steps:
-            - uses: google-github-actions/release-please-action@v4
+            - uses: actions/checkout@v4
+            - uses: googleapis/release-please-action@v4
               with:
-                release-type: simple
-                package-name: ros2-p5-dev
-                changelog-types: >
-                    [
-                        {"type":"feat","section":"Features","hidden":false},
-                        {"type":"fix","section":"Bug Fixes","hidden":false},
-                        {"type":"perf","section":"Performance","hidden":false},
-                        {"type":"refactor","section":"Refactoring","hidden":false},
-                        {"type":"docs","section":"Docs","hidden":true},
-                        {"type":"chore","section":"Chores","hidden":true},
-                        {"type":"revert","section":"Reverts","hidden":true}
-                    ]
-                changelog-path: CHANGELOG.md
+                manifest-file: .release-please-manifest.json
+                config-file: release-please-config.json
