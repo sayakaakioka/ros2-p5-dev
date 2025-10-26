@@ -19,6 +19,8 @@ permissions:
 env:
   REGISTRY: ghcr.io
   IMAGE: ${{ github.repository_owner }}/ros2-p5-dev
+  DEFAULT_PROCESSING_VERSION: "4.4.0"
+  DEFAULT_PROCESSING_BUILD:   "1277"
 
 jobs:
   build:
@@ -40,8 +42,8 @@ jobs:
       - name: Resolve config
         id: cfg
         run: |
-          PV="${{ github.event.inputs.PROCESSING_VERSION }}"; PV="${PV:-${{ vars.PROCESSING_VERSION }}}"
-          PB="${{ github.event.inputs.PROCESSING_BUILD   }}"; PB="${PB:-${{ vars.PROCESSING_BUILD   }}}"
+          PV="${{ github.event.inputs.PROCESSING_VERSION }}"; PV="${PV:-${{ vars.PROCESSING_VERSION }}}"; PV="${PV:-${{ env.DEFAULT_PROCESSING_VERSION }}}"
+          PB="${{ github.event.inputs.PROCESSING_BUILD   }}"; PB="${PB:-${{ vars.PROCESSING_BUILD   }}}";   PB="${PB:-${{ env.DEFAULT_PROCESSING_BUILD   }}}"
           echo "PROCESSING_VERSION=$PV" >> $GITHUB_OUTPUT
           echo "PROCESSING_BUILD=$PB"   >> $GITHUB_OUTPUT
 
