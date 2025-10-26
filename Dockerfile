@@ -52,6 +52,8 @@ RUN set -eux; \
   esac; \
   TAG="processing-${PROCESSING_BUILD}-${PROCESSING_VERSION}"; \
   URL="https://github.com/processing/processing4/releases/download/${TAG}/${PFILE}"; \
+  test -n "${PROCESSING_VERSION}" && test -n "${PROCESSING_BUILD}" \
+  || (echo "ARGS MISSING: PROCESSING_VERSION='${PROCESSING_VERSION}' PROCESSING_BUILD='${PROCESSING_BUILD}'" && exit 1) \
   echo "Fetching Processing from: ${URL}"; \
   curl -fsSL --retry 5 --retry-delay 3 --retry-connrefused -o /tmp/processing.zip "${URL}"; \
   rm -rf /tmp/p5; mkdir -p /tmp/p5; \
