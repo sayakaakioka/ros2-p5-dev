@@ -19,7 +19,7 @@ permissions:
 env:
   REGISTRY: ghcr.io
   IMAGE: ${{ github.repository_owner }}/ros2-p5-dev
-  DEFAULT_PROCESSING_VERSION: "4.4.0"
+  DEFAULT_PROCESSING_VERSION: "4.4.10"
   DEFAULT_PROCESSING_BUILD:   "1310"
 
 jobs:
