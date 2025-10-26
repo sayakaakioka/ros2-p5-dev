@@ -18,15 +18,6 @@ ghcr.io/sayakaakioka/ros2-p5-dev:latest | Latest stable build (points to the new
 ghcr.io/sayakaakioka/ros2-p5-dev:ros2-kilted | ROS2 Kilted-based environment
 ghcr.io/sayakaakioka/ros2-p5-dev:ros2-jazzy | ROS2 Jazzy-based environment
 ghcr.io/sayakaakioka/ros2-p5-dev:ros2-humble | ROS2 Humble-based environment
-ghcr.io/sayakaakioka/ros2-p5-dev:vX.Y-ros2-`<distro>` | Version-locked tag (e.g. `v2.7-ros2-humble`)
-
-The `latest` tag is updated automatically on each GitHub Release.
-
-## Releases
-See all published versions and changelogs at [GitHub Releases](https://github.com/sayakaakioka/ros2-p5-dev/releases)
-
-The release notes are automatically generated when new tags (e.g., `v2.7`) are pushed.
-Each release provides prebuilt multi-arch images for all supported ROS2 distros.
 
 ## Quick Start
 1. Run the container. Replace `<tag>` with your desired image tag (e.g. `ros2-kilted` or `latest`):

@@ -53,7 +53,7 @@ RUN set -eux; \
   TAG="processing-${PROCESSING_BUILD}-${PROCESSING_VERSION}"; \
   URL="https://github.com/processing/processing4/releases/download/${TAG}/${PFILE}"; \
   echo "Fetching Processing from: ${URL}"; \
-  curl -fL --retry 5 --retry-delay 3 --retry-connrefused -o /tmp/processing.zip "${URL}"; \
+  curl -fsSL --retry 5 --retry-delay 3 --retry-connrefused -o /tmp/processing.zip "${URL}"; \
   rm -rf /tmp/p5; mkdir -p /tmp/p5; \
   unzip -q /tmp/processing.zip -d /tmp/p5; \
   dir="$(find /tmp/p5 -maxdepth 1 -type d \( -iname 'processing*' -o -iname 'Processing*' \) | head -n1)"; \

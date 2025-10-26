@@ -65,5 +65,10 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
+          build-args: |
+            UBUNTU_TAG=24.04
+            ROS_DISTRO=${{ matrix.ros}}
+            PROCESSING_VERSION=4.4.10
+            PROCESSING_BUILD=1310
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
