@@ -19,8 +19,6 @@ permissions:
 env:
   REGISTRY: ghcr.io
   IMAGE: ${{ github.repository_owner }}/ros2-p5-dev
-  PROCESSING_VERSION: ${{ github.event.inputs.PROCESSING_VERSION || vars.PROCESSING_VERSION }}
-  PROCESSING_BUILD:   ${{ github.event.inputs.PROCESSING_BUILD   || vars.PROCESSING_BUILD }}
 
 jobs:
   build:
@@ -39,12 +37,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Guard: require PROCESSING_* values
+      - name: Resolve config
+        id: cfg
         run: |
-          : "${PROCESSING_VERSION:?PROCESSING_VERSION is required}"
-          : "${PROCESSING_BUILD:?PROCESSING_BUILD is required}"
-          echo "OK: ${PROCESSING_VERSION} / ${PROCESSING_BUILD}"
-          
+          PV="${{ github.event.inputs.PROCESSING_VERSION }}"; PV="${PV:-${{ vars.PROCESSING_VERSION }}}"
+          PB="${{ github.event.inputs.PROCESSING_BUILD   }}"; PB="${PB:-${{ vars.PROCESSING_BUILD   }}}"
+          echo "PROCESSING_VERSION=$PV" >> $GITHUB_OUTPUT
+          echo "PROCESSING_BUILD=$PB"   >> $GITHUB_OUTPUT
+
+      - name: Guard
+        if: ${{ steps.cfg.outputs.PROCESSING_VERSION == '' || steps.cfg.outputs.PROCESSING_BUILD == '' }}
+        run: |
+          echo "::error::PROCESSING_VERSION and/or PROCESSING_BUILD is not set"
+          exit 1
+
       - uses: docker/setup-qemu-action@v3
       - uses: docker/setup-buildx-action@v3
 
@@ -58,7 +64,7 @@ jobs:
       - name: Compose fixed tags
         id: tags
         run: |
-          MAIN="processing-${PROCESSING_VERSION}-build-${PROCESSING_BUILD}-ros-${{ matrix.ros }}"
+          MAIN="processing-${{ steps.cfg.outputs.PROCESSING_VERSION }}-build-${{ steps.cfg.outputs.PROCESSING_BUILD }}-ros-${{ matrix.ros }}"
           echo "main=${MAIN}" >> $GITHUB_OUTPUT
 
       - name: Extract metadata
@@ -74,10 +80,9 @@ jobs:
             org.opencontainers.image.title=ros2-p5-dev
             org.opencontainers.image.description=ROS2 + Processing toolchain image
             org.opencontainers.image.vendor=sayakaakioka
-            org.opencontainers.image.version=${{ env.PROCESSING_VERSION }}-${{ env.PROCESSING_BUILD }}
-            org.opencontainers.image.revision=${{ github.sha }}
-            io.github.processing.version=${{ env.PROCESSING_VERSION }}
-            io.github.processing.build=${{ env.PROCESSING_BUILD }}
+            org.opencontainers.image.version=${{ steps.cfg.outputs.PROCESSING_VERSION }}-${{ steps.cfg.outputs.PROCESSING_BUILD }}
+            io.github.processing.version=${{ steps.cfg.outputs.PROCESSING_VERSION }}
+            io.github.processing.build=${{ steps.cfg.outputs.PROCESSING_BUILD }}
             io.ros.distro=${{ matrix.ros }}
             
       - name: Build & push (multi-arch)
@@ -90,7 +95,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             UBUNTU_TAG=24.04
-            ROS_DISTRO=${{ matrix.ros}}
-            PROCESSING_VERSION=${{ env.PROCESSING_VERSION }}
-            PROCESSING_BUILD=${{ env.PROCESSING_BUILD }}
+            ROS_DISTRO=${{ matrix.ros }}
+            PROCESSING_VERSION=${{ steps.cfg.outputs.PROCESSING_VERSION }}
+            PROCESSING_BUILD=${{ steps.cfg.outputs.PROCESSING_BUILD }}
           provenance: false
