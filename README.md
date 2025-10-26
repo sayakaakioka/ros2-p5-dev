@@ -15,9 +15,9 @@ All images in this repository are distributed under the [Apache License 2.0](./L
 Image Tag         | Description
 -------------------|-------------
 ghcr.io/sayakaakioka/ros2-p5-dev:latest | Latest stable build (points to the newest ROS2 distro, currently **Kilted**)
-ghcr.io/sayakaakioka/ros2-p5-dev:ros2-kilted | ROS2 Kilted-based environment
-ghcr.io/sayakaakioka/ros2-p5-dev:ros2-jazzy | ROS2 Jazzy-based environment
-ghcr.io/sayakaakioka/ros2-p5-dev:ros2-humble | ROS2 Humble-based environment
+ghcr.io/sayakaakioka/ros2-p5-dev:kilted | ROS2 Kilted-based environment
+ghcr.io/sayakaakioka/ros2-p5-dev:jazzy | ROS2 Jazzy-based environment
+ghcr.io/sayakaakioka/ros2-p5-dev:humble | ROS2 Humble-based environment
 
 ## Quick Start
 1. Run the container. Replace `<tag>` with your desired image tag (e.g. `ros2-kilted` or `latest`):

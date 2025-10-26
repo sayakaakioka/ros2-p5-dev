@@ -55,10 +55,9 @@ jobs:
         with:
           images: ${{ env.IMAGE }}
           tags: |
-            type=raw,value=ros2-${{ matrix.ros }}
+            type=raw,value=${{ matrix.ros }}
             type=raw,value=latest,enable=${{ matrix.latest && github.ref_type == 'branch' }}
-            type=raw,value=${{ steps.ver.outputs.raw }}-ros2-${{ matrix.ros }},enable=${{ github.ref_type == 'tag' }}
-
+            
       - name: Build & push (multi-arch)
         uses: docker/build-push-action@v6
         with:
