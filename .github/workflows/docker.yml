@@ -1,20 +1,29 @@
 name: Build & Push (GHCR)
 
 on:
+  workflow_dispatch:
+    inputs:
+      PROCESSING_VERSION:
+        description: Processing version (e.g. 4.3.2)
+        required: true
+      PROCESSING_BUILD:
+        description: Processing build (e.g. 1277)
+        required: true
   push:
     branches: [ main ]
-    tags:
-      - 'v*'
 
 permissions:
   contents: read
   packages: write
 
 env:
-  IMAGE: ghcr.io/${{ github.repository }}
+  REGISTRY: ghcr.io
+  IMAGE: ${{ github.repository_owner }}/ros2-p5-dev
+  PROCESSING_VERSION: ${{ github.event.inputs.PROCESSING_VERSION || vars.PROCESSING_VERSION }}
+  PROCESSING_BUILD:   ${{ github.event.inputs.PROCESSING_BUILD   || vars.PROCESSING_BUILD }}
 
 jobs:
-  docker:
+  build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -30,33 +39,46 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Guard: require PROCESSING_* values
+        run: |
+          : "${PROCESSING_VERSION:?PROCESSING_VERSION is required}"
+          : "${PROCESSING_BUILD:?PROCESSING_BUILD is required}"
+          echo "OK: ${PROCESSING_VERSION} / ${PROCESSING_BUILD}"
+          
       - uses: docker/setup-qemu-action@v3
       - uses: docker/setup-buildx-action@v3
 
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Compute version (for tag builds)
-        id: ver
+      
+      - name: Compose fixed tags
+        id: tags
         run: |
-          if [ "${{ github.ref_type }}" = "tag" ]; then
-            RAW="${{ github.ref_name }}"     # v1.2.3
-            echo "raw=$RAW" >> $GITHUB_OUTPUT
-            echo "semver=${RAW#v}" >> $GITHUB_OUTPUT  # 1.2.3
-          fi
+          MAIN="processing-${PROCESSING_VERSION}-build-${PROCESSING_BUILD}-ros-${{ matrix.ros }}"
+          echo "main=${MAIN}" >> $GITHUB_OUTPUT
 
-      - name: Docker meta (compute tags)
+      - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.IMAGE }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE }}
           tags: |
+            type=raw,value=${{ steps.tags.outputs.main }}
             type=raw,value=${{ matrix.ros }}
-            type=raw,value=latest,enable=${{ matrix.latest && github.ref_type == 'branch' }}
+            type=raw,value=latest,enable=${{ matrix.latest && github.ref == 'refs/heads/main' }}
+          labels: |
+            org.opencontainers.image.title=ros2-p5-dev
+            org.opencontainers.image.description=ROS2 + Processing toolchain image
+            org.opencontainers.image.vendor=sayakaakioka
+            org.opencontainers.image.version=${{ env.PROCESSING_VERSION }}-${{ env.PROCESSING_BUILD }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            io.github.processing.version=${{ env.PROCESSING_VERSION }}
+            io.github.processing.build=${{ env.PROCESSING_BUILD }}
+            io.ros.distro=${{ matrix.ros }}
             
       - name: Build & push (multi-arch)
         uses: docker/build-push-action@v6
@@ -64,10 +86,11 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             UBUNTU_TAG=24.04
             ROS_DISTRO=${{ matrix.ros}}
-            PROCESSING_VERSION=4.4.10
-            PROCESSING_BUILD=1310
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+            PROCESSING_VERSION=${{ env.PROCESSING_VERSION }}
+            PROCESSING_BUILD=${{ env.PROCESSING_BUILD }}
+          provenance: false
