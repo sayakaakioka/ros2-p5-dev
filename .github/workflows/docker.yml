@@ -31,10 +31,13 @@ jobs:
         include:
           - ros: kilted
             latest: true
+            ubuntu_tag: "24.04"
           - ros: jazzy
             latest: false
+            ubuntu_tag: "24.04"
           - ros: humble
             latest: false
+            ubuntu_tag: "22.04"
 
     steps:
       - uses: actions/checkout@v4
@@ -96,8 +99,13 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            UBUNTU_TAG=24.04
+            UBUNTU_TAG=${{ matrix.ubuntu_tag }}
             ROS_DISTRO=${{ matrix.ros }}
             PROCESSING_VERSION=${{ steps.cfg.outputs.PROCESSING_VERSION }}
             PROCESSING_BUILD=${{ steps.cfg.outputs.PROCESSING_BUILD }}
           provenance: false
+      
+      - name: Image check for ROS2 installation
+        run: |
+          docker run --rm $(echo "${{ steps.meta.outputs.tags }}" | head -n1 | cut -d',' -f1) \
+          bash -lc 'set -e test -d /opt/ros/${ROS_DISTRO}'

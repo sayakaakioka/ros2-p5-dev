@@ -21,20 +21,31 @@ RUN locale-gen en_US en_US.UTF-8
 RUN update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
 ENV LANG=en_US.UTF-8
 
-RUN apt-get update && apt-get install --no-install-recommends -y curl ca-certificates gnupg \
- && rm -rf /var/lib/apt/lists/*
-RUN curl -fsSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key \
-    | gpg --dearmor -o /usr/share/keyrings/ros-archive-keyring.gpg; \
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] \
-      http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" \
-      > /etc/apt/sources.list.d/ros2.list; \
-    apt-get update; \
+# RUN apt-get update && apt-get install --no-install-recommends -y curl ca-certificates gnupg lsb-release \
+#  && rm -rf /var/lib/apt/lists/*
+# RUN curl -fsSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key \
+#     | gpg --dearmor -o /usr/share/keyrings/ros-archive-keyring.gpg; \
+#     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] \
+#       http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" \
+#       > /etc/apt/sources.list.d/ros2.list;
+
+RUN set -eux; \
+    apt-get update && apt-get install -y --no-install-recommends curl ca-certificates gnupg lsb-release; \
+    UB_CODENAME="$(. /etc/os-release && echo ${UBUNTU_CODENAME:-${VERSION_CODENAME}})"; \
+    REL=$(curl -fsSL https://api.github.com/repos/ros-infrastructure/ros-apt-source/releases/latest \
+          | sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p'); \
+    curl -fsSL -o /tmp/ros2-apt-source.deb \
+      "https://github.com/ros-infrastructure/ros-apt-source/releases/download/${REL}/ros2-apt-source_${REL}.${UB_CODENAME}_all.deb"; \
+    dpkg -i /tmp/ros2-apt-source.deb; \
+    rm -f /tmp/ros2-apt-source.deb
+
+    RUN apt-get update; \
     apt-get install -y --no-install-recommends ros-${ROS_DISTRO}-desktop ros-dev-tools; \
     rm -rf /var/lib/apt/lists/*
 
 # Processing + GUI tools installation
 RUN apt-get update && apt-get install --no-install-recommends -y \
-    unzip lsb-release \
+    unzip \
     xvfb x11vnc fluxbox websockify novnc supervisor \
     mesa-utils libgl1 libglu1-mesa libxi6 libxrender1 libxtst6 \
     libxrandr2 libxinerama1 libxxf86vm1 libgtk-3-0 \
@@ -81,6 +92,9 @@ RUN echo "ubuntu ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
   && mkdir -p /home/ubuntu/.config /home/ubuntu/.cache /home/ubuntu/.local/share \
   && chown -R ubuntu:ubuntu /home/ubuntu/.config /home/ubuntu/.cache /home/ubuntu/.local
 WORKDIR /home/ubuntu
+
+RUN printf '%s\n' ". /opt/ros/${ROS_DISTRO}/setup.sh || true" \
+  > /etc/profile.d/ros2.sh
 
 # supervisor settings
 RUN printf '%s\n' \
