@@ -49,6 +49,9 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     xvfb x11vnc fluxbox websockify novnc supervisor \
     mesa-utils libgl1 libglu1-mesa libxi6 libxrender1 libxtst6 \
     libxrandr2 libxinerama1 libxxf86vm1 libgtk-3-0 \
+    libxcursor1 libxext6 libxxf86vm1 libasound2 \
+    mesa-utils fonts-dejavu-core \
+    libxkbcommon0 libxkbcommon-x11-0 xkb-data \
     xauth x11-apps xterm sudo x11-xserver-utils \
     dbus-x11 libgl1-mesa-dri \
     less lynx \
